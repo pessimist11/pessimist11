@@ -28,6 +28,26 @@ jobs:
             dist/github-contribution-grid-snake.svg
             dist/github-contribution-grid-snake-dark.svg?palette=github-dark
 
+      - name: Slow down the animation slightly
+        run: |
+          python3 - <<'PY'
+          import re
+          from decimal import Decimal
+          from pathlib import Path
+
+          # Keep the snake, contribution cells, and progress bar synchronized.
+          duration = re.compile(r"(\banimation:[^;{}]*?)(\d+(?:\.\d+)?)ms\b")
+          for name in ("github-contribution-grid-snake.svg", "github-contribution-grid-snake-dark.svg"):
+              path = Path("dist") / name
+              svg, count = duration.subn(
+                  lambda match: match[1] + format(Decimal(match[2]) * Decimal("1.35"), "f") + "ms",
+                  path.read_text(),
+              )
+              if not count:
+                  raise RuntimeError(f"No animation duration found in {name}")
+              path.write_text(svg)
+          PY
+
       - name: Publish animations to the output branch
         uses: crazy-max/ghaction-github-pages@df5cc2bfa78282ded844b354faee141f06b41865 # v4
         with:
