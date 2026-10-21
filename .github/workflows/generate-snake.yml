@@ -3,11 +3,13 @@ name: Update contribution snake
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 0 * * *'
+    # Refresh throughout the day; GitHub may delay scheduled runs.
+    - cron: '17 */6 * * *'
   push:
     branches: [main]
     paths:
       - '.github/workflows/generate-snake.yml'
+      - 'README.md'
 
 concurrency:
   group: contribution-snake
@@ -23,6 +25,7 @@ jobs:
       - name: Generate light and dark contribution animations
         uses: Platane/snk/svg-only@d8f6715049803e982ee5ff501b6b9b7d5deeb09b # v3
         with:
+          # GitHub includes anonymous private activity when Private contributions is enabled.
           github_user_name: ${{ github.repository_owner }}
           outputs: |
             dist/github-contribution-grid-snake.svg
